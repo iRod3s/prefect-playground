@@ -1,0 +1,32 @@
+services:
+  devcontainer:
+    depends_on:
+      - postgres
+    build: 
+      context: .
+      args:
+        UV_VERSION: "0.5.13"
+        DEBIAN_VERSION: "bookworm"
+    environment:
+      - PREFECT_API_URL=http://127.0.0.1:4200/api
+      - PREFECT_API_DATABASE_CONNECTION_URL=postgresql+asyncpg://prefect:prefect@localhost:5432/prefect
+      - PREFECT_API_DATABASE_ECHO=False
+      - PREFECT_API_DATABASE_MIGRATE_ON_START=True
+  
+    network_mode: service:postgres
+        
+    command: sleep infinity
+    volumes:
+      - ..:/workspace:cached
+  postgres:
+      image: postgres:17.2
+      environment:
+          - POSTGRES_USER=prefect
+          - POSTGRES_PASSWORD=prefect
+          - POSTGRES_DB=prefect
+      volumes:
+          - prefect-postgres:/var/lib/postgresql/data
+
+volumes:
+    prefect-postgres:
+        name: prefect-postgres
