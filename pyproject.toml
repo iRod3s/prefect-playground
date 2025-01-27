@@ -1,0 +1,14 @@
+[project]
+name = "prefect-playground"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "prefect>=3.1.14",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.9.3",
+]
