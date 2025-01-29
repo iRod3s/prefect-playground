@@ -826,11 +826,26 @@ wheels = [
 ]
 
 [[package]]
+name = "prefect-docker"
+version = "0.6.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "docker" },
+    { name = "exceptiongroup" },
+    { name = "prefect" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/77/fc/fcf64753a7b6373ad31669f0c0df928d51f8edbd3a6b56adbd1799153acf/prefect_docker-0.6.2.tar.gz", hash = "sha256:405cdf2b266c7e1ffcb61f5b80c710401bc2eb5f25dcbccc195b0e5c86f5a421", size = 33777 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4e/55/6f81b38f6190779904d02179a5589d5d5b84c7167fbd8d7c5827dd584083/prefect_docker-0.6.2-py3-none-any.whl", hash = "sha256:bae500ff0c18e3e1c55f2e79ec154bc1f8c8329fbe6a3726052dfb0fe38d7d4c", size = 23661 },
+]
+
+[[package]]
 name = "prefect-playground"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "prefect" },
+    { name = "prefect-docker" },
 ]
 
 [package.optional-dependencies]
@@ -841,6 +856,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "prefect", specifier = ">=3.1.14" },
+    { name = "prefect-docker", specifier = ">=0.6.2" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
 ]
 
