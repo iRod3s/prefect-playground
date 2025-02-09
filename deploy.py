@@ -1,9 +1,9 @@
 from prefect import deploy
 
-from flows.test_flow import test_flow
+from flows.example_flow import example
 
 REGISTERED_FLOWS = {
-    "test_flow": test_flow.test_flow
+    "test_flow": example.example_flow
 }
 
 if __name__ == "__main__":
@@ -12,5 +12,6 @@ if __name__ == "__main__":
     deploy(
         *deployments,
         work_pool_name="test-docker",
-        image="prefect_test:dev"
+        image="prefect_test:dev", 
+        push=False
     )

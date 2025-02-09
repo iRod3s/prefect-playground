@@ -1,7 +1,5 @@
 services:
   devcontainer:
-    depends_on:
-      - postgres
     build: 
       context: .
       args:
@@ -12,9 +10,7 @@ services:
       - PREFECT_API_DATABASE_CONNECTION_URL=postgresql+asyncpg://prefect:prefect@localhost:5432/prefect
       - PREFECT_API_DATABASE_ECHO=False
       - PREFECT_API_DATABASE_MIGRATE_ON_START=True
-  
-    network_mode: service:postgres
-        
+          
     command: sleep infinity
     volumes:
       - ..:/workspace:cached
@@ -26,6 +22,18 @@ services:
           - POSTGRES_DB=prefect
       volumes:
           - prefect-postgres:/var/lib/postgresql/data
+
+      network_mode: service:devcontainer
+
+  prefect-server:
+    image: prefecthq/prefect:3.1.14-python3.12
+    entrypoint: 
+      - prefect
+      - server
+      - start
+
+    network_mode: service:devcontainer
+
 
 volumes:
     prefect-postgres:
