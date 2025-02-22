@@ -22,8 +22,13 @@
                 "charliermarsh.ruff",
                 "waderyan.gitblame",
                 "ms-python.python",
+                "ms-python.vscode-pylance",
                 "ms-azuretools.vscode-docker"
-            ]
+            ],
+            "settings": {
+                "python.terminal.activateEnvInCurrentTerminal": true,
+                "python.defaultInterpreterPath": ".venv/bin/python"
+            }
         }
     },
 
@@ -37,7 +42,7 @@
 		"PYTHONDONTWRITEBYTECODE": "1"
 	},
 
-    "postCreateCommand": "uv sync"
+    "postCreateCommand": "uv sync",
 
     // Uncomment the next line if you will be using a pre-commit.
     // "postStartCommand": "uv run pre-commit install"

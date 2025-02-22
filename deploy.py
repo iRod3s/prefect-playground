@@ -1,10 +1,9 @@
 from prefect import Flow, deploy
 from prefect.deployments.runner import RunnerDeployment
 
-from typer import Typer
-
 from flows.example_flow import example
 from flows.polars_based_flow import polars_flow
+from flows.scheduled_and_reaggs import main
 from dataclasses import dataclass, field
 
 
@@ -15,13 +14,23 @@ class DeploymentDefinition:
     work_pool_name: str
     image: str
     extra_pip_packages: list[str] = field(default_factory=list)
+    cron_interval: str | None = None
+
+    def resolve_job_variables(self) -> dict[str, str | dict[str, str]]:
+        result = {}
+
+        if self.extra_pip_packages:
+            result["env"] = {
+                "EXTRA_PIP_PACKAGES": f"{','.join(self.extra_pip_packages)}"
+            }
+
+        return result
 
     def to_deployment(self) -> RunnerDeployment:
         return self.flow_object.to_deployment(
             self.name,
-            job_variables={
-                "env": {"EXTRA_PIP_PACKAGES": f"{','.join(self.extra_pip_packages)}"}
-            },
+            job_variables=self.resolve_job_variables(),
+            cron=self.cron_interval,
         )
 
 
@@ -39,12 +48,16 @@ REGISTERED_FLOWS: list[DeploymentDefinition] = [
         image="prefect_test:dev",
         extra_pip_packages=["polars==1.22.0"],
     ),
+    DeploymentDefinition(
+        name="scheduled_flow",
+        flow_object=main.scheduled_flow,
+        work_pool_name="test-docker",
+        image="prefect_test:dev",
+        cron_interval="0 0 * * *",
+    ),
 ]
 
-app = Typer()
 
-
-@app.command(name="deploy")
 def deploy_flows() -> None:
     for target_flow in REGISTERED_FLOWS:
         deployment_id = deploy(
@@ -55,7 +68,3 @@ def deploy_flows() -> None:
         )
 
         print(f"Deployed ID: {deployment_id} (Flow: {target_flow.name})")
-
-
-if __name__ == "__main__":
-    app()
