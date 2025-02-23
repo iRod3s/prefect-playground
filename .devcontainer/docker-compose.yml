@@ -9,7 +9,8 @@ services:
       - PREFECT_API_URL=http://127.0.0.1:4200/api
       - PREFECT_API_DATABASE_CONNECTION_URL=postgresql+asyncpg://prefect:prefect@localhost:5432/prefect
       - PREFECT_API_DATABASE_ECHO=False
-      - PREFECT_API_DATABASE_MIGRATE_ON_START=True
+      - PREFECT_DEFAULT_RESULT_STORAGE_BLOCK=s3-bucket/prefect-results-storage-bucket 
+      - PREFECT_RESULTS_PERSIST_BY_DEFAULT=True
           
     command: sleep infinity
     volumes:

@@ -5,6 +5,8 @@ from deploy import deploy_flows
 
 from prefect import get_client
 
+from blocks.s3_default_block import register_blocks as register_s3_blocks
+
 import json
 
 app = Typer()
@@ -13,6 +15,11 @@ app = Typer()
 @app.command(name="deploy")
 def run_deployment() -> None:
     deploy_flows()
+
+
+@app.command(name="register_blocks")
+def register_blocks() -> None:
+    register_s3_blocks()
 
 
 @app.command(name="trigger_flow")

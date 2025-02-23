@@ -42,7 +42,7 @@
 		"PYTHONDONTWRITEBYTECODE": "1"
 	},
 
-    "postCreateCommand": "uv sync",
+    "postCreateCommand": "uv sync --dev",
 
     // Uncomment the next line if you will be using a pre-commit.
     // "postStartCommand": "uv run pre-commit install"
