@@ -13,7 +13,7 @@
         "ghcr.io/devcontainers/features/docker-in-docker:2": {}
     },
 
-	"forwardPorts": [4200],
+	"forwardPorts": [4200, 9001],
 
 	// Configure tool-specific properties.
     "customizations": {
