@@ -102,10 +102,7 @@ def deploy_flows() -> None:
             deployment_id = deploy(
                 target_flow.to_deployment(),
                 work_pool_name=target_flow.work_pool_name,
-                image = DockerImage(
-                    name=target_flow.image,
-                    dockerfile="Dockerfile"
-                ),
+                image=DockerImage(name=target_flow.image, dockerfile="Dockerfile"),
                 # image=target_flow.image,
                 push=False,
             )

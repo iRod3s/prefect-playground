@@ -37,7 +37,8 @@ def polars_flow(min: int = 0, max: int = 100):
     create_table_artifact(
         key="generated-df",
         table=data.to_dict(),
-        description="Generated DF in the generate_df task")
+        description="Generated DF in the generate_df task",
+    )
 
     min, max, mean = calculate_values(data)
     return min, max, mean
