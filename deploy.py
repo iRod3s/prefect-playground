@@ -14,6 +14,12 @@ from prefect.automations import RunDeployment
 
 
 @dataclass
+class AutomationDefinition:
+    name: str
+    automate_after_flow_name: str
+
+
+@dataclass
 class DeploymentDefinition:
     name: str
     flow_object: Flow
@@ -21,7 +27,7 @@ class DeploymentDefinition:
     image: str
     extra_pip_packages: list[str] = field(default_factory=list)
     cron_interval: str | None = None
-    automate_after: str | None = None
+    automation: AutomationDefinition | None = None
 
     def resolve_job_variables(self) -> dict[str, str | dict[str, str]]:
         result = {}
@@ -74,7 +80,10 @@ REGISTERED_FLOWS: list[DeploymentDefinition] = [
         flow_object=second_flow.second_flow,
         work_pool_name="test-docker",
         image="prefect_test:dev",
-        automate_after=first_flow.first_flow.name,
+        automation=AutomationDefinition(
+            name="do_second_step",
+            automate_after_flow_name=first_flow.first_flow.name,
+        ),
     ),
     DeploymentDefinition(
         name="multistep_first_flow_explicit",
@@ -91,37 +100,48 @@ def deploy_flows() -> None:
     pending_deployments = REGISTERED_FLOWS.copy()
 
     while len(pending_deployments) > 0:
-        for target_flow in pending_deployments:
-            if (
-                target_flow.automate_after is not None
-                and target_flow.automate_after not in created_deployments_ids
-            ):
-                continue
-
-            # TODO: Run all deployments at once to avoid building the same image multiple times
-            deployment_id = deploy(
-                target_flow.to_deployment(),
-                work_pool_name=target_flow.work_pool_name,
-                image=DockerImage(name=target_flow.image, dockerfile="Dockerfile"),
-                # image=target_flow.image,
-                push=False,
+        target_flow = pending_deployments.pop(0)
+        if (
+            target_flow.automation is not None
+            and target_flow.automation.automate_after_flow_name
+            not in created_deployments_ids
+        ):
+            print(
+                f"Skipping {target_flow.name} because {target_flow.automation.automate_after_flow_name} is not deployed yet"
             )
+            pending_deployments.append(target_flow)
 
-            print(f"Deployed ID: {deployment_id} (Flow: {target_flow.name})")
+        # TODO: Run all deployments at once to avoid building the same image multiple times
+        deployment_id = deploy(
+            target_flow.to_deployment(),
+            work_pool_name=target_flow.work_pool_name,
+            image=DockerImage(name=target_flow.image, dockerfile="Dockerfile"),
+            # image=target_flow.image,
+            push=False,
+        )
 
-            created_deployments_ids[target_flow.name] = deployment_id
+        print(f"Deployed ID: {deployment_id} (Flow: {target_flow.name})")
 
-            if target_flow.automate_after is not None:
-                if target_flow.automate_after == target_flow.name:
-                    raise (ValueError("Cannot automate after itself"))
+        created_deployments_ids[target_flow.name] = deployment_id
 
-                # TODO: Check if automation exist to avoid duplicates
+        if target_flow.automation is not None:
+            if target_flow.automation.automate_after_flow_name == target_flow.name:
+                raise (ValueError("Cannot automate after itself"))
+
+            try:
+                automation: Automation = Automation.read(
+                    name=target_flow.automation.name
+                )
+                print(
+                    f"Automation already exists: {automation.id} for {target_flow.name}"
+                )
+            except ValueError:
                 automation = Automation(
-                    name="do_second_step",
+                    name=target_flow.automation.name,
                     trigger=DeploymentEventTrigger(
                         expect={"prefect.flow-run.Completed"},
                         match_related={
-                            "prefect.resource.name": target_flow.automate_after
+                            "prefect.resource.name": target_flow.automation.automate_after_flow_name
                         },
                     ),
                     actions=[
@@ -136,9 +156,5 @@ def deploy_flows() -> None:
                 ).create()
                 print(f"Automation created: {automation.id} for {target_flow.name}")
 
-            created_deployments_ids[target_flow.flow_object.name] = deployment_id[0]
-
-            # TODO: I don't like this line, but it's the easiest way to remove the element from the list
-            pending_deployments.remove(target_flow)
-
+        created_deployments_ids[target_flow.flow_object.name] = deployment_id[0]
         print(f"Pending deployments: {len(pending_deployments)}")
