@@ -1,4 +1,5 @@
 from prefect import flow, task
+from prefect.artifacts import create_table_artifact
 import polars as pl
 
 import random
@@ -32,6 +33,11 @@ def calculate_values(df: pl.DataFrame) -> tuple[int, int, int]:
 @flow(retries=3, retry_delay_seconds=5, log_prints=True)
 def polars_flow(min: int = 0, max: int = 100):
     data = generate_df()
+
+    create_table_artifact(
+        key="generated-df",
+        table=data.to_dict(),
+        description="Generated DF in the generate_df task")
 
     min, max, mean = calculate_values(data)
     return min, max, mean

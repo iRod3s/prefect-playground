@@ -32,6 +32,11 @@ services:
       - prefect
       - server
       - start
+    environment:
+      - PREFECT_API_DATABASE_CONNECTION_URL=postgresql+asyncpg://prefect:prefect@localhost:5432/prefect
+      - PREFECT_API_DATABASE_ECHO=False
+      - PREFECT_DEFAULT_RESULT_STORAGE_BLOCK=s3-bucket/prefect-results-storage-bucket 
+      - PREFECT_RESULTS_PERSIST_BY_DEFAULT=True
 
     network_mode: service:devcontainer
 

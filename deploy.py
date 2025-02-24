@@ -5,7 +5,7 @@ from prefect.docker import DockerImage
 from flows.example_flow import example
 from flows.polars_based_flow import polars_flow
 from flows.scheduled_and_reaggs import main
-from flows.multi_flow_pipeline import first_flow, second_flow
+from flows.multi_flow_pipeline import first_flow, second_flow, explicit_first_flow
 from dataclasses import dataclass, field
 
 from prefect.automations import Automation
@@ -75,6 +75,12 @@ REGISTERED_FLOWS: list[DeploymentDefinition] = [
         work_pool_name="test-docker",
         image="prefect_test:dev",
         automate_after=first_flow.first_flow.name,
+    ),
+    DeploymentDefinition(
+        name="multistep_first_flow_explicit",
+        flow_object=explicit_first_flow.first_flow_explicit,
+        work_pool_name="test-docker",
+        image="prefect_test:dev",
     ),
 ]
 
