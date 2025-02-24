@@ -1,5 +1,6 @@
 from prefect import Flow, deploy
 from prefect.deployments.runner import RunnerDeployment
+from prefect.docker import DockerImage
 
 from flows.example_flow import example
 from flows.polars_based_flow import polars_flow
@@ -91,10 +92,15 @@ def deploy_flows() -> None:
             ):
                 continue
 
+            # TODO: Run all deployments at once to avoid building the same image multiple times
             deployment_id = deploy(
                 target_flow.to_deployment(),
                 work_pool_name=target_flow.work_pool_name,
-                image=target_flow.image,
+                image = DockerImage(
+                    name=target_flow.image,
+                    dockerfile="Dockerfile"
+                ),
+                # image=target_flow.image,
                 push=False,
             )
 
@@ -106,7 +112,7 @@ def deploy_flows() -> None:
                 if target_flow.automate_after == target_flow.name:
                     raise (ValueError("Cannot automate after itself"))
 
-                # Check if automation exist to avoid duplicates
+                # TODO: Check if automation exist to avoid duplicates
                 automation = Automation(
                     name="do_second_step",
                     trigger=DeploymentEventTrigger(
