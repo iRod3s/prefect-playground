@@ -4,6 +4,6 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY pyproject.toml /opt/prefect/workspace/pyproject.toml
 COPY uv.lock /opt/prefect/workspace/uv.lock
 ENV UV_PROJECT_ENVIRONMENT="/usr/local/"
-RUN uv sync --frozen --directory /opt/prefect/workspace
+RUN uv sync --frozen --no-dev --directory /opt/prefect/workspace
 COPY . /opt/prefect/workspace/
 WORKDIR /opt/prefect/workspace/
